@@ -1,46 +1,53 @@
-### Infra Diagram:
+## Infra Diagram:
 ![Screenshot](arch.png)
 
 ### Description:
-1. Client was using a IOT platform know as openremote(https://github.com/openremote/openremote).
-2. They want to host the openremote after adding their some custom plugin on a server on 2 different AWS account.
-3. One account will host dev env & another will host the production env.
-4. They also want to automate the whole process with CD so that apps will deploy on server with a git push on dev & git merge on prod.
+1. Client had a establised product running on Azure apps service as backend & VM as frontend, where the users info are stored in database.
+2. The frontend was created in ReactJS and Backend was created DotNet.
+3. They want to have a solution which can run both AWS and Azure with Multi-tenant architecture.
+4. Deploying a whole achitecture was time taking, that's why they want us to find a solution where they can deply everthing within mins.
 
-### Website: 
-``````
-platform.herd-itt.com
-platform-dev.herd-itt.com
-``````
+## Website:
+     https://m9999.dev.mandatlyonline.net
 
 ### Used Apps:
-1. Amazon EC2 fargate to deploy our server.
-2. Amazon CodePipeline for CI/CD.
-3. Amazon ECR to save dockerimage.
-4. Github to manage codebase.
+1. Amazon EKS, where backend api i.e DotNet is deployed.
+2. Amazon S3 where reactjs was deployed to host a static website.
+3. Amazon RDS to store info of users.
+4. Amazon ECR to store the container images.
+5. Amazon CloudFront for path based routing.
+6. Amazon Certificate Manager for SSL.
 
 ### Apps Into:
-1. **AWS EC2 fargate**:<br/>
-                    a. It helps you to run your containers without having to manage servers or clusters of Amazon EC2 instances. <br/>
-                    b. You no longer have to provision, configure, or scale clusters of virtual machines.
+1. **Amazon EKS**: <br/>
+                    a. It s a managed Kubernetes service to run you containers.  <br/>
+                    b. It gives you the advantage of all the performance like scale, reliability, and availability of AWS infrastructure, as 
+                        well as integrations with AWS networking & security services.
 
-2. **Amazon CodePipeline**:<br/>
-                     a. It isa  fully managed CD service that helps to automate the release pipelines for fast & reliable application & infrastructure updates with new codebase. <br/>
-                     b. It can intregrate with any version control system like github, codecommit etc. <br/>
-                     c. It composite of two steps i.e codebuild and codedeploy and together it is called codepipeline.
+2. **Amazon S3**: <br/>
+                a. It is an object storage service, which main purpose is to store the static objects like photo etc. <br/>
+                b. It also give the advantage to host the static website.
 
-3. **AWS ECR**:<br/>
-            a. It is a fully managed container registry where you can save application docker images and its artifacts.
+3. **AWS ECR**: <br/>
+            a. It is a fully managed container registry where you can save deploy application images and artifacts. <br/>
 
-4. **Github**:<br/>
-            a. It is a developer platform that allows developers to create, store, manage and share their codes. <br/>
-            b. It also help developer to manage the different versions(history) of code.
+4. **Amazon CloudFront**: <br/>
+                    a. It is a is a content delivery network (CDN) service built for high performance, security. <br/>
+                    b. It works like a loadbalancer which help to route your traffic according to your convenience in all regions. <br/>
+                    c. It also works with path based routing for example: <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;website.com\api ====> backend <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;website.com\index.html ====> frontend
+
+5. **Amazon Certificate Manager**: <br/>
+                    a. It provision, manage, & deploy public & private SSL/TLS certificates for use with AWS services. <br/>
+                    b. It removes the time-consuming manual process of purchasing, uploading, & renewing SSL/TLS certificates.
 
 ### Solution:
-1. Openremote is a open sources and they guys already build their application to run on container.
-2. We used the same container to run the apps on the fargate(EC2).
-3. But we also modify the Dockerfile so that their will also compile with container.
-4. We created 2 branch in the repo one for dev and one for prod and connected with codepipeline through a oath read token.
-5. The token gives access to codepipeline to pull the code, and along with dockerfile we also create a buildspec.yml & appspec.yml file.
-6. Buildspec.yml & appspec.yml is a template file which gives instruction to codebuild & codedeply about the steps to perform on them.
-7. Whenever developer push the code in github the codebuild build a docker with the help of dockerfile and push it to ECR and then after codedeploy deploy the same dockerimage in fargate.
+1. We find out that their fronted was static so we decided to host that on S3 backed by cloudfront to call index.html
+2. We helped them to containerized their Dotnet applications to run on Kubernetes.
+3. Nginx was used as webserver infront of Dotnet with all the path routs configure plus by using ELB the inbound/outboud traffic was established for the container.
+4. The toughest challenge was to create cloudfront in such a way that it can route the traffic by path based & with custom headers.
+5. At last we created lots of terraform scripts to deploy all the application with 4-5 steps.
+
+
+## NOTE: WE PROVIDE THE SAME INFRA SOLUTION FOR BOTH AZURE/AWS/GCP, ONLY COMPONENT GET CHANGES
